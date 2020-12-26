@@ -30,6 +30,7 @@ typedef struct student
     int courseScore; /*已选课程学分*/
     int courseCount; /*需要选择课程的数量*/
     struct student *next;
+    struct student *prev;
 } Student;
 
 // 定义学生结构体链表头
@@ -79,6 +80,16 @@ void StudentSelect(int count);
 void ShowStudentCourse(Student *head);
 
 /**
+ * 交换链表次序
+ * 
+ * 该交换过程详见https://www.cnblogs.com/bokezhilu/p/7620181.html
+ * @param   s1      链表1
+ * @param   s2      链表2
+ * @return  无
+ * */
+void Swap(Student *s1, Student *s2);
+
+/**
  * 对学生信息结构体链表进行排序
  * @param   sp      学生信息结构体链表
  * @return  无
@@ -101,9 +112,11 @@ start:
     printf("2.学生选课\n");
     printf("3.学生选课情况查看\n");
     printf("4.存储选课情况\n");
-    printf("\n请输入菜单选项(1~7):\n");
+    printf("5.导入学生选课文件\n");
+    printf("6.退出系统\n");
+    printf("\n请输入菜单选项(1~6):\n");
     scanf("%d", &i);
-    if (i < 1 || i > 7)
+    if (i < 1 || i > 6)
     {
         printf("输入错误，请重新输入：");
         system("cls");
@@ -128,6 +141,18 @@ start:
         // 显示学生选课情况
         ShowStudentCourse(studentHead);
         goto start;
+        break;
+    case 4:
+        system("cls");
+        goto start;
+        break;
+    case 5:
+        system("cls");
+        goto start;
+        break;
+    case 6:
+        system("cls");
+        exit(0);
         break;
 
     default:
@@ -195,6 +220,8 @@ void StudentSelect(int count)
     {
         printf("有%d名学生需要选课，目前已完成%d人\n", count, i);
         p1 = (Student *)malloc(sizeof(Student));
+        p1->next = NULL;
+        p1->prev = NULL;
         if (i == 0)
         {
             studentHead = p1;
@@ -202,6 +229,7 @@ void StudentSelect(int count)
         else
         {
             p2->next = p1;
+            p1->prev = p2;
         }
         p2 = p1;
         // p1->courseChooseNum = 0;
@@ -265,16 +293,16 @@ void UpdataCourseList(Course *head, int courseCode)
 
 void ShowStudentCourse(Student *head)
 {
-    // SortStudentList(head);
+    SortStudentList(head);
 
-    Student *p1 = head;
-    printf("学生姓名\t已选课程\t学分\n");
+    Student *p1 = studentHead;
+    printf("学生姓名\t\t已选课程\t学分\n");
 
     for (; p1 != NULL; p1 = p1->next)
     {
         for (int i = 0; i < p1->courseCount; i++)
         {
-            printf("%-20s%-10s%d\n", p1->studentName,
+            printf("%-24s%-17s%d\n", p1->studentName,
                    courseName[p1->courseCode[i] - 1], p1->courseCode[i]);
         }
     }
@@ -282,5 +310,87 @@ void ShowStudentCourse(Student *head)
 
 void SortStudentList(Student *sp)
 {
-    return;
+    Student *head = sp;
+    char control = 1;
+
+    while (head != NULL)
+    {
+        Student *headNext = head->next;
+        while (headNext != NULL)
+        {
+            if (headNext->courseScore < head->courseScore)
+            {
+                Swap(head, headNext);
+                // 注意这里一定要交换下，因为改了链表节点的位置
+                Student *tmp = head;
+                head = headNext;
+                headNext = tmp;
+            }
+            headNext = headNext->next;
+        }
+        // 完成第一次交换后，最小值在链表头
+        if (control == 1)
+        {
+            studentHead = head;
+            control = 0;
+        }
+        head = head->next;
+    }
+}
+
+void Swap(Student *s1, Student *s2)
+{
+    if (s1->next == s2)
+    {
+        if (s2->next != NULL)
+        {
+            s2->next->prev = s1;
+        }
+        if (s1->prev != NULL)
+        {
+            s1->prev->next = s2;
+        }
+        s1->next = s2->next;
+        s2->prev = s1->prev;
+        s1->prev = s2;
+        s2->next = s1;
+    }
+    else if (s1->prev == s2)
+    {
+        if (s1->next != NULL)
+        {
+            s1->next->prev = s2;
+        }
+        if (s2->prev != NULL)
+        {
+            s2->prev->next = s1;
+        }
+        s2->next = s1->next;
+        s1->prev = s2->prev;
+        s2->prev = s1;
+        s1->next = s2;
+    }
+    else
+    {
+        if (s1->next != NULL)
+        {
+            s1->next->prev = s2;
+        }
+        if (s1->prev != NULL)
+        {
+            s1->prev->next = s2;
+        }
+        if (s2->next != NULL)
+        {
+            s2->next->prev = s1;
+        }
+        if (s2->prev != NULL)
+        {
+            s2->prev->next = s1;
+        }
+        Student *s1Next = s1->next;
+        Student *s1Prev = s1->prev;
+        s2->next = s1Next;
+        s2->prev = s1Prev;
+    }
 }
