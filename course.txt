@@ -2,3 +2,6 @@
 2 Math 2 20
 3 English 3 30
 4 Physics 4 40
+5 Politics 5 50
+6 Chemistry 6 60
+
